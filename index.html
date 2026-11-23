@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0b1020" />
+  <title>notinhas — seu cantinho de ideias</title>
+  <meta name="description" content="Organize estudos, ideias e aprendizados em cadernos e notas privadas com sincronização Supabase." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <div id="loading" class="loading-screen"><div class="spinner"></div><span>Preparando seu espaço...</span></div>
+  <main id="setup" class="auth-wrap hidden">
+    <div class="auth-card">
+      <div class="brand-logo">✦</div><h1>Falta só conectar o Supabase</h1>
+      <p>Abra <code>config.js</code>, insira a URL e a chave pública do seu projeto. Execute <code>schema.sql</code> no SQL Editor do Supabase e recarregue.</p>
+      <p class="subtle">O arquivo README.md explica todo o processo.</p>
+    </div>
+  </main>
+  <main id="auth" class="auth-wrap hidden">
+    <div class="auth-decoration"><div class="intro-label">SEU SEGUNDO CÉREBRO</div><h2>Transforme o que você aprende em conhecimento que fica.</h2><p>Anote, conecte ideias e encontre tudo quando precisar.</p><div class="deco-orb"></div></div>
+    <div class="auth-card">
+      <div class="brand"><div class="brand-logo">✦</div><span>notinhas</span></div>
+      <div class="auth-head"><h1 id="auth-title">Boas-vindas de volta</h1><p id="auth-subtitle">Entre para acessar suas anotações.</p></div>
+      <button id="google-login" class="google-login" type="button"><span class="google-g">G</span> Continuar com Google</button><div class="auth-divider">ou entre com e-mail</div>
+      <form id="auth-form">
+        <label for="email">E-mail</label><input id="email" type="email" autocomplete="email" placeholder="seu@email.com" required />
+        <div id="password-group"><label for="password">Senha</label><input id="password" type="password" autocomplete="current-password" placeholder="Pelo menos 6 caracteres" minlength="6" required /></div>
+        <button class="primary full" id="auth-submit" type="submit">Entrar na minha conta</button>
+      </form>
+      <div id="auth-error" class="form-message" aria-live="polite"></div>
+      <div class="auth-switch"><button id="switch-mode" class="text-button">Criar uma conta</button><button id="forgot-password" class="text-button">Esqueci a senha</button></div>
+    </div>
+  </main>
+  <div id="app" class="app hidden">
+    <aside id="sidebar" class="sidebar">
+      <div class="side-top"><div class="brand"><div class="brand-logo">✦</div><span>notinhas</span></div><button class="icon-btn mobile-close" id="close-sidebar" title="Fechar menu" aria-label="Fechar menu">✕</button></div>
+      <button id="new-note-side" class="primary create-button"><span>＋</span> Nova anotação <span class="shortcut">N</span></button>
+      <nav class="main-nav" aria-label="Biblioteca">
+        <button class="nav-item" data-view="home"><span class="nav-ico">⌂</span> Início</button>
+        <button class="nav-item active" data-view="all"><span class="nav-ico">▦</span> Todas as notas <span class="count" id="count-all">0</span></button>
+        <button class="nav-item" data-view="recent"><span class="nav-ico">◷</span> Recentes</button>
+        <button class="nav-item" data-view="favorites"><span class="nav-ico">☆</span> Favoritas <span class="count" id="count-favorites">0</span></button>
+        <button class="nav-item" data-view="pinned"><span class="nav-ico">⌁</span> Fixadas <span class="count" id="count-pinned">0</span></button>
+        <button class="nav-item" data-view="archive"><span class="nav-ico">▤</span> Arquivadas</button>
+        <button class="nav-item" data-view="trash"><span class="nav-ico">♻</span> Lixeira</button>
+      </nav>
+      <div class="side-section-head"><span>CADERNOS</span><button class="icon-btn plus-small" id="add-notebook" title="Criar caderno" aria-label="Criar caderno">＋</button></div>
+      <div id="notebooks" class="notebooks"></div>
+      <div class="side-section-head tags-heading"><span>ETIQUETAS</span></div>
+      <div id="tags-sidebar" class="tags-sidebar"><span class="muted small">As etiquetas aparecerão aqui.</span></div>
+      <div class="side-bottom"><div class="backup-actions"><button id="export-backup" type="button">↓ Exportar tudo</button><button id="import-backup" type="button">↑ Importar backup</button><input id="backup-file" type="file" accept=".zip,application/zip" hidden /></div><div class="tip"><span class="tip-icon">✧</span><div><strong>Organize suas descobertas.</strong><p>Crie um caderno para cada assunto que estiver estudando.</p></div></div><div class="account"><div class="avatar" id="avatar">U</div><div class="account-name"><strong id="user-name">Minha conta</strong><span id="user-email"></span></div><button class="icon-btn" id="signout" title="Sair" aria-label="Sair">⇥</button></div></div>
+    </aside>
+    <div class="workspace">
+      <header class="topbar"><button id="toggle-sidebar" class="top-layout-btn" type="button" title="Ocultar ou mostrar menu">☰ Ocultar menu</button><button class="icon-btn menu-btn" id="open-sidebar" title="Menu" aria-label="Abrir menu">☰</button><div class="breadcrumbs"><span>Meu espaço</span><span class="sep">/</span><strong id="current-location">Todas as notas</strong></div><div class="top-actions"><button id="toggle-focus" class="top-layout-btn" type="button" title="Expandir nota">⛶ Tela cheia</button><span id="sync-status" class="sync-status">● Sincronizado</span><button id="new-note-top" class="top-new">＋ Nova nota</button></div></header>
+      <main id="home-screen" class="home-screen hidden" aria-label="Painel inicial">
+        <div class="home-welcome"><div><div class="home-eyebrow">SEU ESPAÇO DE CONHECIMENTO</div><h1>Seu cantinho, tudo à vista.</h1><p>Uma visão rápida do que você vem guardando e dos seus próximos pontos de partida.</p></div><button id="home-new-note" class="primary home-primary" type="button">＋ Nova anotação</button></div>
+        <div class="home-stats"><div class="home-stat"><span>Anotações</span><strong id="home-total">0</strong><small>na biblioteca</small></div><div class="home-stat"><span>Atualizadas na semana</span><strong id="home-week">0</strong><small>últimos 7 dias</small></div><div class="home-stat"><span>Cadernos</span><strong id="home-books">0</strong><small>assuntos organizados</small></div><div class="home-stat"><span>Favoritas</span><strong id="home-favorites">0</strong><small>para consultar depois</small></div></div>
+        <section class="home-panel shortcut-panel"><div class="home-panel-header"><div><span class="home-kicker">ACESSO RÁPIDO</span><h2>Meus atalhos</h2><p>Seus sites favoritos, a um clique.</p></div><button class="home-outline" id="shortcut-new" type="button">＋ Novo atalho</button></div><div id="home-shortcuts" class="shortcut-grid"></div></section>
+        <div class="home-two-columns"><section class="home-panel"><div class="home-panel-header"><div><span class="home-kicker">CONTINUE DE ONDE PAROU</span><h2>Notas recentes</h2></div><button id="home-all-notes" class="home-link" type="button">Ver todas →</button></div><div id="home-recents" class="home-note-list"></div></section><section class="home-panel"><div class="home-panel-header"><div><span class="home-kicker">SEMPRE À MÃO</span><h2>Notas fixadas</h2></div></div><div id="home-pinned" class="home-note-list"></div></section></div>
+        <section class="home-panel"><div class="home-panel-header"><div><span class="home-kicker">ORGANIZAÇÃO</span><h2>Seus cadernos</h2></div><button id="home-add-book" class="home-link" type="button">＋ Criar caderno</button></div><div id="home-cadernos" class="home-books"></div></section>
+      </main>
+      <div id="content-area" class="content-area">
+        <section class="notes-column"><div class="notes-heading"><div><div class="eyebrow">MINHA BIBLIOTECA</div><h1 id="section-title">Todas as notas</h1><p id="section-description">Seu conhecimento cresce uma nota por vez.</p></div><button id="notebook-menu" class="icon-btn hidden" title="Editar caderno" aria-label="Editar caderno">⋯</button></div>
+          <div class="search-wrap"><span>⌕</span><input id="search" placeholder="Buscar por título, conteúdo ou etiqueta..." aria-label="Buscar notas" /><kbd>Ctrl K</kbd></div>
+          <div class="list-controls"><span id="result-count">0 anotações</span><select id="sort" aria-label="Ordenar notas"><option value="updated">Mais recentes</option><option value="created">Data de criação</option><option value="alpha">Ordem alfabética</option></select></div>
+          <div id="notes-list" class="notes-list"></div>
+        </section>
+        <section id="editor" class="editor"><div class="empty-editor"><div class="empty-illustration">✎</div><h2>Suas ideias começam aqui</h2><p>Selecione uma anotação ou crie uma nova para começar a organizar seus aprendizados.</p><button id="empty-new" class="primary">＋ Criar minha primeira nota</button></div></section>
+      </div>
+    </div>
+  </div>
+  <dialog id="shortcut-dialog" class="modal"><form id="shortcut-form"><h2 id="shortcut-dialog-title">Novo atalho</h2><p>Adicione um site à sua tela inicial.</p><label for="shortcut-name">Nome do atalho</label><input id="shortcut-name" type="text" maxlength="80" placeholder="Ex.: Documentação do Supabase" required /><label for="shortcut-url">Link do site</label><input id="shortcut-url" type="text" inputmode="url" maxlength="2048" placeholder="https://exemplo.com" required /><div class="modal-actions"><button id="shortcut-cancel" class="secondary" type="button">Cancelar</button><button class="primary" type="submit">Salvar atalho</button></div><button id="shortcut-delete" class="danger-link hidden" type="button">Excluir atalho</button></form></dialog>
+  <dialog id="image-lightbox" class="image-lightbox"><button type="button" data-close-lightbox aria-label="Fechar imagem">✕</button><img id="lightbox-image" alt="Imagem ampliada" /></dialog>
+  <dialog id="notebook-dialog" class="modal"><form id="notebook-form" method="dialog"><h2 id="notebook-dialog-title">Novo caderno</h2><p>Separe seus estudos por temas, projetos ou áreas.</p><label for="notebook-name">Nome do caderno</label><input id="notebook-name" maxlength="80" placeholder="Ex.: Estudos de IA" required /><label>Cor do caderno</label><div id="colors" class="color-choices"></div><div class="modal-actions"><button class="secondary" id="cancel-notebook" type="button">Cancelar</button><button class="primary" type="submit">Salvar caderno</button></div><button type="button" id="delete-notebook" class="danger-link hidden">Excluir caderno</button></form></dialog>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
